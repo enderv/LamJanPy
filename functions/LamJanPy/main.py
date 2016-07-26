@@ -17,7 +17,7 @@ def handle(event, context):
             config = yaml.load(stream)
         except yaml.YAMLError as exc:
             print(exc)
-    test = Janitor(config)
+    janitor_runner = Janitor(config)
 
     return event
 
