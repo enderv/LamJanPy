@@ -18,7 +18,7 @@ def handle(event, context):
         except yaml.YAMLError as exc:
             print(exc)
     janitor_runner = Janitor(config)
-
+    janitor_runner.use_janitor()
     return event
 
 if __name__ == '__main__':

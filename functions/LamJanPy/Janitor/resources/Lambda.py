@@ -1,20 +1,27 @@
 from datetime import datetime, timedelta
-from violations import TagViolation, UseViolation
+from violations import UseViolation
+
+
 class Lambda:
-    def __init__(self, session):
-        self.session = session
-        self.lambda_client = session.client('lambda')
-        self.cloudwatch_client = session.client('cloudwatch')
-        self.function_names = (function['FunctionName'] for function in self.lambda_client.list_functions())
+    def __init__(self):
+        self.session = None
+        self.lambda_client = None
+        self.cloudwatch_client = None
         self.violations = []
         #for import testing purposes
         print "hello"
+
+    def set_session(self, session):
+        self.session = session
+        self.lambda_client = session.client('lambda')
+        self.cloudwatch_client = session.client('cloudwatch')
 
     def tag_janitor(self):
         print "Tags not yet implemented for Lamda"
 
     def use_janitor(self, rule):
-        for function_name in self.function_names:
+        function_names = (function['FunctionName'] for function in self.lambda_client.list_functions())
+        for function_name in function_names:
             metrics = self.cloudwatch_client.get_metric_statistics(
                 Namespace='AWS/Lambda',
                 MetricName='Invocations',
