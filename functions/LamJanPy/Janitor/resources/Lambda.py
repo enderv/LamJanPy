@@ -7,19 +7,22 @@ class Lambda:
         self.session = None
         self.lambda_client = None
         self.cloudwatch_client = None
-        self.violations = []
+        self.region = None
         #for import testing purposes
         print "hello"
 
-    def set_session(self, session):
+    def set_session(self, session, region):
         self.session = session
         self.lambda_client = session.client('lambda')
         self.cloudwatch_client = session.client('cloudwatch')
+        self.region = region
 
     def tag_janitor(self):
         print "Tags not yet implemented for Lamda"
 
     def use_janitor(self, rule):
+        violations = []
+        #TODO Error Catching
         function_names = (function['FunctionName'] for function in self.lambda_client.list_functions())
         for function_name in function_names:
             metrics = self.cloudwatch_client.get_metric_statistics(
@@ -38,7 +41,7 @@ class Lambda:
                 Unit='Count'
             )
             if len(metrics['Datapoints'] == 0):
-                self.violations.append(UseViolation(self.region, 'lambda', function_name, rule))
+                violations.append(UseViolation(self.region, 'lambda', function_name, rule))
             if not len(metric for metric in metrics['Datapoints'] if metric['Maximum'] > 0) > 0:
-                self.violations.append(UseViolation(self.region, 'lambda', function_name, rule))
-        return self.violations
+                violations.append(UseViolation(self.region, 'lambda', function_name, rule))
+        return violations

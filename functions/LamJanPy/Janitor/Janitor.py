@@ -1,6 +1,5 @@
 import importlib
 import boto3
-import os
 
 valid_regions = ['us-east-1', 'us-west-2', 'us-west-1', 'eu-west-1', 'eu-central-1', 'ap-southeast-1',
                     'ap-northeast-1', 'ap-southeast-2', 'ap-northeast-2', 'ap-south-1', 'sa-east-1']
@@ -28,16 +27,35 @@ class Janitor():
                 self.resources_to_check[key] = instance
             except ImportError:
                 raise ValueError(key + " is not a valid resource to check")
+
         self.use_rules = config['use_rules']
         self.required_tags = config['required_tags']
         self.regions = config['regions']
         self.violations = []
+
+        #Set all resource tag rules
+        try:
+            self.all_tags = self.required_tags['all']
+        except AttributeError:
+            self.all_tags = []
 
     def run_check(self):
         for region in self.regions:
             for name, resource in self.resources_to_check.items():
                 session = boto3.Session(region_name=region)
                 resource.set_session(session)
-                self.violations += resource.tag_janitor()
-                self.violations += resource.use_janitor()
+                try:
+                    rule = self.required_tags[name] + self.all_tags
+                    self.violations += resource.tag_janitor(rule)
+                except AttributeError:
+                    if len(self.all_tags) > 0:
+                        print "No tag rule set for " + name + " using the all rule"
+                        self.violations += resource.tag_janitor(self.all_tags)
+                    else:
+                        print "No tag rule set for " + name + " and no all rule set skipping tag check"
+                try:
+                    rule = self.use_rules[name]
+                    self.violations += resource.use_janitor(rule)
+                except AttributeError:
+                    print "No use rule set for " + name + " skipping use check"
 
