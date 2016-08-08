@@ -59,3 +59,5 @@ class Janitor():
                 except AttributeError:
                     print "No use rule set for " + name + " skipping use check"
 
+    def slack_report(self):
+        report = "\n".join(self.violations)
