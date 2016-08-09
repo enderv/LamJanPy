@@ -1,5 +1,6 @@
 import importlib
 import boto3
+import requests
 
 valid_regions = ['us-east-1', 'us-west-2', 'us-west-1', 'eu-west-1', 'eu-central-1', 'ap-southeast-1',
                     'ap-northeast-1', 'ap-southeast-2', 'ap-northeast-2', 'ap-south-1', 'sa-east-1']
@@ -33,6 +34,11 @@ class Janitor():
         self.regions = config['regions']
         self.violations = []
 
+        try:
+            self.slack_url = config['slack_url']
+        except AttributeError:
+            print "No slack notifications will be sent"
+
         #Set all resource tag rules
         try:
             self.all_tags = self.required_tags['all']
@@ -60,4 +66,9 @@ class Janitor():
                     print "No use rule set for " + name + " skipping use check"
 
     def slack_report(self):
-        report = "\n".join(self.violations)
+        message = '\n'.join(self.violations)
+        text = "Violations Found"
+        message = {"text": text, "attachments": {'color': '#fff000', 'text': message}}
+        r = requests.post("http://httpbin.org/post", data=message)
+        if r.status_code != 200:
+            print "Error sending slack message"
