@@ -1,9 +1,11 @@
 from datetime import datetime, timedelta
 from violations import UseViolation, TagViolation
+from BaseResource import BaseResource
 
 
-class EC2:
+class EC2(BaseResource):
     def __init__(self):
+        super(BaseResource, self).__init__()
         self.session = None
         self.ec2_client = None
         self.violations = []

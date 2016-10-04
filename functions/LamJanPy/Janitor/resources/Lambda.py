@@ -1,9 +1,11 @@
 from datetime import datetime, timedelta
 from violations import UseViolation
+from BaseResource import BaseResource
 
 
-class Lambda:
+class Lambda(BaseResource):
     def __init__(self):
+        super(BaseResource, self).__init__()
         self.session = None
         self.lambda_client = None
         self.cloudwatch_client = None
@@ -18,7 +20,7 @@ class Lambda:
         self.region = region
 
     def tag_janitor(self):
-        print "Tags not yet implemented for Lamda"
+        print "Tags not yet implemented for Lambda"
 
     def use_janitor(self, rule):
         violations = []
